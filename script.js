@@ -39,13 +39,34 @@ function getTodos() {
   
   // SIMULTANEOUS DATA
   function getData() {
-    console.log('Simultaneous Request');
+    axios.all([
+        axios.get('https://jsonplaceholder.typicode.com/todos?_limit=5'),
+        axios.get('https://jsonplaceholder.typicode.com/posts?_limit=5')
+    ])
+    .then(axios.spread((todos, posts) => showOutput(posts)))
+    .catch(err => console.error(err));
   }
   
   // CUSTOM HEADERS
   function customHeaders() {
-    console.log('Custom Headers');
-  }
+    const config = {
+    headers: {
+        'Content-Type': 'appkication/json',
+        Authorization: 'sometoken'
+    }
+}
+
+    axios
+    .post('https://jsonplaceholder.typicode.com/todos', {
+        title: 'New Todo',
+        completed: false
+    }, 
+    config    
+    )
+    .then(res => showOutput(res))
+    .catch(err => console.error(err));
+    
+}
   
   // TRANSFORMING REQUESTS & RESPONSES
   function transformResponse() {
@@ -63,7 +84,16 @@ function getTodos() {
   }
   
   // INTERCEPTING REQUESTS & RESPONSES
-  
+  axios.interceptors.request.use(config => {
+    console.log(`${config.method.toUpperCase()} request sent to ${config.url} at ${new Date().getTime() }`);
+
+    return config
+  }, error => {
+    return Promise.reject(error);
+  }
+);
+
+
   // AXIOS INSTANCES
   
   // Show output in browser
